@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"ioc/Config"
 	. "ioc/Injector"
 	"ioc/services"
@@ -17,6 +16,6 @@ func main() {
 
 	userService := services.NewUserService()
 	BeanFactory.Apply(userService)
-	fmt.Println(userService.Order.DB)
+	userService.GetUserInfo(2)
 	// user->order->db
 }

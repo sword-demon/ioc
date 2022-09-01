@@ -8,7 +8,7 @@ type IOrder interface {
 
 type OrderService struct {
 	Version string
-	DB      *DBService `inject:"-"`
+	//DB      *DBService `inject:"-"`
 }
 
 func NewOrderService() *OrderService {
