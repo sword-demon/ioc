@@ -37,6 +37,27 @@ func (beanFactoryImpl *BeanFactoryImpl) Get(v interface{}) interface{} {
 	return nil
 }
 
+func (this *BeanFactoryImpl) Config(cfgs ...interface{}) {
+	for _, cfg := range cfgs {
+		t := reflect.TypeOf(cfg)
+		if t.Kind() != reflect.Ptr {
+			panic("required ptr object")
+		}
+		// 把config本身加入bean
+		this.Set(cfg)
+		// 自动构建 ExprMap
+		this.ExprMap[t.Name()] = cfg
+		v := reflect.ValueOf(cfg)
+		for i := 0; i < t.NumMethod(); i++ {
+			method := v.Method(i)
+			callRet := method.Call(nil)
+			if callRet != nil && len(callRet) == 1 {
+				this.Set(callRet[0].Interface())
+			}
+		}
+	}
+}
+
 // Apply 处理依赖注入
 func (beanFactoryImpl *BeanFactoryImpl) Apply(bean interface{}) {
 	if bean == nil {
@@ -60,10 +81,10 @@ func (beanFactoryImpl *BeanFactoryImpl) Apply(bean interface{}) {
 		// 还得判断属性是否首字母大写
 		if v.Field(i).CanSet() && field.Tag.Get("inject") != "" {
 			// 判断是否已经有了，不重复初始化实例
-			if getV := beanFactoryImpl.Get(field.Type); getV != nil {
-				v.Field(i).Set(reflect.ValueOf(getV))
-				continue
-			}
+			//if getV := beanFactoryImpl.Get(field.Type); getV != nil {
+			//	v.Field(i).Set(reflect.ValueOf(getV))
+			//	continue
+			//}
 			// 兼容写 - 的方式
 			if field.Tag.Get("inject") != "-" {
 				// 表达式方式支持
@@ -75,6 +96,10 @@ func (beanFactoryImpl *BeanFactoryImpl) Apply(bean interface{}) {
 						beanFactoryImpl.Set(retValue)
 						v.Field(i).Set(reflect.ValueOf(retValue))
 					}
+				}
+			} else {
+				if getV := beanFactoryImpl.Get(field.Type); getV != nil {
+					v.Field(i).Set(reflect.ValueOf(getV))
 				}
 			}
 		}

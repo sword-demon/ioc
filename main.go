@@ -14,9 +14,9 @@ func main() {
 	//userService.GetOrderInfo(uid)
 
 	serviceConfig := Config.NewServiceConfig()
-	BeanFactory.ExprMap = map[string]interface{}{
-		"ServiceConfig": serviceConfig,
-	}
+	//BeanFactory.ExprMap = map[string]interface{}{
+	//	"ServiceConfig": serviceConfig,
+	//}
 	BeanFactory.Set(serviceConfig)
 
 	userService := services.NewUserService()
