@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"ioc/Config"
 	. "ioc/Injector"
 	"ioc/services"
 )
@@ -12,7 +13,11 @@ func main() {
 	//userService.GetUserInfo(uid)
 	//userService.GetOrderInfo(uid)
 
-	BeanFactory.Set(services.NewOrderService())
+	serviceConfig := Config.NewServiceConfig()
+	BeanFactory.ExprMap = map[string]interface{}{
+		"ServiceConfig": serviceConfig,
+	}
+	BeanFactory.Set(serviceConfig)
 
 	userService := services.NewUserService()
 	BeanFactory.Apply(userService)
