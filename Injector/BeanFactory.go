@@ -59,17 +59,22 @@ func (beanFactoryImpl *BeanFactoryImpl) Apply(bean interface{}) {
 		// 获取tag的属性值
 		// 还得判断属性是否首字母大写
 		if v.Field(i).CanSet() && field.Tag.Get("inject") != "" {
+			// 判断是否已经有了，不重复初始化实例
+			if getV := beanFactoryImpl.Get(field.Type); getV != nil {
+				v.Field(i).Set(reflect.ValueOf(getV))
+				continue
+			}
 			// 兼容写 - 的方式
-			if field.Tag.Get("inject") == "-" {
-				if getV := beanFactoryImpl.Get(field.Type); getV != nil {
-					v.Field(i).Set(reflect.ValueOf(getV))
-				}
-			} else {
+			if field.Tag.Get("inject") != "-" {
 				// 表达式方式支持
 				log.Println("使用了表达式的方式")
 				ret := expr.BeanExpr(field.Tag.Get("inject"), beanFactoryImpl.ExprMap)
 				if ret != nil && !ret.IsEmpty() {
-					v.Field(i).Set(reflect.ValueOf(ret[0]))
+					retValue := ret[0]
+					if retValue != nil {
+						beanFactoryImpl.Set(retValue)
+						v.Field(i).Set(reflect.ValueOf(retValue))
+					}
 				}
 			}
 		}
