@@ -37,22 +37,22 @@ func (beanFactoryImpl *BeanFactoryImpl) Get(v interface{}) interface{} {
 	return nil
 }
 
-func (this *BeanFactoryImpl) Config(cfgs ...interface{}) {
+func (beanFactoryImpl *BeanFactoryImpl) Config(cfgs ...interface{}) {
 	for _, cfg := range cfgs {
 		t := reflect.TypeOf(cfg)
 		if t.Kind() != reflect.Ptr {
 			panic("required ptr object")
 		}
 		// 把config本身加入bean
-		this.Set(cfg)
+		beanFactoryImpl.Set(cfg)
 		// 自动构建 ExprMap
-		this.ExprMap[t.Name()] = cfg
+		beanFactoryImpl.ExprMap[t.Name()] = cfg
 		v := reflect.ValueOf(cfg)
 		for i := 0; i < t.NumMethod(); i++ {
 			method := v.Method(i)
 			callRet := method.Call(nil)
 			if callRet != nil && len(callRet) == 1 {
-				this.Set(callRet[0].Interface())
+				beanFactoryImpl.Set(callRet[0].Interface())
 			}
 		}
 	}
@@ -95,11 +95,16 @@ func (beanFactoryImpl *BeanFactoryImpl) Apply(bean interface{}) {
 					if retValue != nil {
 						beanFactoryImpl.Set(retValue)
 						v.Field(i).Set(reflect.ValueOf(retValue))
+						// 递归执行
+						beanFactoryImpl.Apply(retValue)
 					}
 				}
 			} else {
+				// 单例模式
 				if getV := beanFactoryImpl.Get(field.Type); getV != nil {
 					v.Field(i).Set(reflect.ValueOf(getV))
+					// 递归执行
+					beanFactoryImpl.Apply(getV)
 				}
 			}
 		}

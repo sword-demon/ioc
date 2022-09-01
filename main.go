@@ -8,18 +8,15 @@ import (
 )
 
 func main() {
-	//uid := 123
-	//userService := services.NewUserService(services.NewOrderService())
-	//userService.GetUserInfo(uid)
-	//userService.GetOrderInfo(uid)
 
 	serviceConfig := Config.NewServiceConfig()
 	//BeanFactory.ExprMap = map[string]interface{}{
 	//	"ServiceConfig": serviceConfig,
 	//}
-	BeanFactory.Set(serviceConfig)
+	BeanFactory.Config(serviceConfig)
 
 	userService := services.NewUserService()
 	BeanFactory.Apply(userService)
-	fmt.Println(userService.Order)
+	fmt.Println(userService.Order.DB)
+	// user->order->db
 }

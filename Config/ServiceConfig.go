@@ -11,3 +11,7 @@ func NewServiceConfig() *ServiceConfig {
 func (sc *ServiceConfig) OrderService() *services.OrderService {
 	return services.NewOrderService()
 }
+
+func (sc ServiceConfig) DBService() *services.DBService {
+	return services.NewDBService()
+}
